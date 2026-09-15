@@ -31,4 +31,9 @@ class TeamAdmin(UserAdmin):
             {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
         ),
     )
+
+    def save_model(self, request, obj, form, change):
+        obj.full_clean()
+        super().save_model(request, obj, form, change)
+
     add_fieldsets = ((None, {"fields": ("email", "username", "password1", "password2")}),)

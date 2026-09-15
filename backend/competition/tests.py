@@ -3,8 +3,8 @@ from datetime import timedelta
 from threading import Barrier
 
 from django.contrib.auth import get_user_model
-from django.db import close_old_connections
-from django.test import TestCase, TransactionTestCase
+from django.db import close_old_connections, connections
+from django.test import TestCase, TransactionTestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -251,7 +251,7 @@ class ConcurrencyTests(TransactionTestCase):
                 barrier.wait(timeout=10)
                 return submit(user, self.first.pk, " flag{exact} ")
             finally:
-                close_old_connections()
+                connections.close_all()
 
         with ThreadPoolExecutor(max_workers=len(users)) as pool:
             return list(pool.map(worker, users))
@@ -271,3 +271,29 @@ class ConcurrencyTests(TransactionTestCase):
         results = self.run_race([team] * 4)
         self.assertEqual(Submission.objects.count(), 1)
         self.assertEqual(sum(not r["already_solved"] for r in results), 1)
+
+
+class DemoTests(TestCase):
+    def setUp(self):
+        setup_event()
+        self.client = APIClient(enforce_csrf_checks=True)
+
+    def test_demo_disabled_by_default(self):
+        token = self.client.get("/api/v1/auth/csrf/").json()["csrfToken"]
+        self.assertEqual(
+            self.client.post("/api/v1/auth/demo/", HTTP_X_CSRFTOKEN=token).status_code, 404
+        )
+
+    @override_settings(DEMO_MODE=True)
+    def test_demo_guest_is_private_and_not_staff(self):
+        self.assertEqual(self.client.post("/api/v1/auth/demo/").status_code, 403)
+        token = self.client.get("/api/v1/auth/csrf/").json()["csrfToken"]
+        response = self.client.post("/api/v1/auth/demo/", HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.get(pk=response.json()["id"])
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.has_usable_password())
+        self.assertTrue(user.email.endswith("@demo.invalid"))
+        token = self.client.get("/api/v1/auth/csrf/").json()["csrfToken"]
+        again = self.client.post("/api/v1/auth/demo/", HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(again.json()["id"], str(user.pk))

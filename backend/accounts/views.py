@@ -49,8 +49,8 @@ class LoginView(APIView):
         data = LoginInput(data=request.data)
         data.is_valid(raise_exception=True)
         email = data.validated_data["email"].lower()
-        limit("login", email, 10, 300)
         limit("login-global", "all", 500, 60)
+        limit("login", email, 10, 300)
         user = authenticate(request, email=email, password=data.validated_data["password"])
         if not user:
             return Response({"detail": "Invalid email or password."}, status=400)

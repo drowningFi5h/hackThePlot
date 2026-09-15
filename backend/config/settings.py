@@ -62,7 +62,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
-        default="postgresql://htp:htp@localhost:5432/htp", conn_max_age=60
+        default="postgresql://htp:htp@localhost:5432/htp", conn_max_age=0 if DEBUG else 60
     )
 }
 AUTH_USER_MODEL = "accounts.User"

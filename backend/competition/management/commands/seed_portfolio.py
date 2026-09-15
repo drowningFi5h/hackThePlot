@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from competition.models import Challenge, Event
+from competition.models import Asset, Challenge, Event
 
 
 class Command(BaseCommand):
@@ -50,4 +50,22 @@ class Command(BaseCommand):
             challenge = Challenge(no=no, title=title, question=question, score=score)
             challenge.set_flag(flag)
             challenge.save()
+        first = Challenge.objects.get(no=0)
+        base = settings.FRONTEND_URL
+        if base.startswith("https://"):
+            transcript = Asset.objects.create(
+                challenge=first,
+                name="Signal transcript",
+                type="srt",
+                url=base + "/demo/clue.srt",
+                downloadable=True,
+            )
+            Asset.objects.create(
+                challenge=first,
+                name="Practice signal",
+                type="audio",
+                url=base + "/demo/clue.wav",
+                downloadable=False,
+                transcript=transcript,
+            )
         self.stdout.write("Portfolio practice challenges created; guest entry is enabled.")
