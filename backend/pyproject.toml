@@ -1,0 +1,23 @@
+[project]
+name = "hacktheplot-backend"
+version = "1.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "Django>=5.2,<5.3",
+  "djangorestframework>=3.16,<4",
+  "psycopg[binary]>=3.2,<4",
+  "dj-database-url>=3,<4",
+  "gunicorn>=23,<24",
+  "whitenoise>=6.9,<7",
+  "drf-spectacular>=0.28,<1",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.12,<1", "locust>=2.37,<3"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
