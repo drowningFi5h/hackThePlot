@@ -1,0 +1,13 @@
+{
+  "environment": "local rehearsal; not a measurement of Render Free",
+  "teams": 100,
+  "rounds": 4,
+  "requests": 1400,
+  "elapsed_seconds": 50.21,
+  "warm_p95_seconds": 0.74,
+  "warm_median_seconds": 0.415,
+  "login_p95_seconds": 1.731,
+  "error_percent": 0.0,
+  "errors": [],
+  "passes_http_targets": true
+}

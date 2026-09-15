@@ -1,0 +1,790 @@
+openapi: 3.0.3
+info:
+  title: Hack The Plot API
+  version: 1.0.0
+paths:
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/admin/certificates/:
+    post:
+      operationId: v1_admin_certificates_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IssueInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IssueInputRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueOutput'
+          description: ''
+  /api/v1/admin/certificates/{certificate_id}/revoke/:
+    post:
+      operationId: v1_admin_certificates_revoke_create
+      parameters:
+      - in: path
+        name: certificate_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailOutput'
+          description: ''
+  /api/v1/admin/teams/import/:
+    post:
+      operationId: v1_admin_teams_import_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ImportInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportInputRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportOutput'
+          description: ''
+  /api/v1/auth/csrf/:
+    get:
+      operationId: v1_auth_csrf_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfOutput'
+          description: ''
+  /api/v1/auth/demo/:
+    post:
+      operationId: v1_auth_demo_create
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountOutput'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: v1_auth_login_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginInputRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountOutput'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: v1_auth_logout_create
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailOutput'
+          description: ''
+  /api/v1/auth/me/:
+    get:
+      operationId: v1_auth_me_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountOutput'
+          description: ''
+  /api/v1/certificates/{token}/:
+    get:
+      operationId: v1_certificates_retrieve
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateOutput'
+          description: ''
+  /api/v1/challenges/:
+    get:
+      operationId: v1_challenges_list
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChallengeOutput'
+          description: ''
+  /api/v1/challenges/{challenge_id}/submit/:
+    post:
+      operationId: v1_challenges_submit_create
+      parameters:
+      - in: path
+        name: challenge_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubmitInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubmitInputRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitOutput'
+          description: ''
+  /api/v1/challenges/{no}/:
+    get:
+      operationId: v1_challenges_retrieve
+      parameters:
+      - in: path
+        name: 'no'
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeOutput'
+          description: ''
+  /api/v1/event/:
+    get:
+      operationId: v1_event_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventOutput'
+          description: ''
+  /api/v1/leaderboard/:
+    get:
+      operationId: v1_leaderboard_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaderboardOutput'
+          description: ''
+components:
+  schemas:
+    AccountOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - email
+      - id
+      - role
+      - username
+    AssetOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        url:
+          type: string
+          format: uri
+        downloadable:
+          type: boolean
+        transcript_url:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - downloadable
+      - id
+      - name
+      - transcript_url
+      - type
+      - url
+    CertificateOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        team_name:
+          type: string
+        event_name:
+          type: string
+        rank:
+          type: integer
+        score:
+          type: number
+          format: double
+        issued_at:
+          type: string
+          format: date-time
+      required:
+      - event_name
+      - id
+      - issued_at
+      - rank
+      - score
+      - team_name
+    ChallengeOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        'no':
+          type: integer
+        title:
+          type: string
+        question:
+          type: string
+        score:
+          type: integer
+        solved:
+          type: boolean
+        unlocked:
+          type: boolean
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetOutput'
+      required:
+      - assets
+      - id
+      - 'no'
+      - question
+      - score
+      - solved
+      - title
+      - unlocked
+    CsrfOutput:
+      type: object
+      properties:
+        csrfToken:
+          type: string
+      required:
+      - csrfToken
+    DetailOutput:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    EventOutput:
+      type: object
+      properties:
+        demo_mode:
+          type: boolean
+        name:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        server_time:
+          type: string
+          format: date-time
+      required:
+      - demo_mode
+      - ends_at
+      - name
+      - server_time
+      - starts_at
+      - status
+    ImportInputRequest:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportRowRequest'
+        dry_run:
+          type: boolean
+          default: true
+        reset_existing:
+          type: boolean
+          default: false
+      required:
+      - rows
+    ImportOutput:
+      type: object
+      properties:
+        dry_run:
+          type: boolean
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportResultRow'
+      required:
+      - dry_run
+      - rows
+    ImportResultRow:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        action:
+          type: string
+        password:
+          type: string
+      required:
+      - action
+      - email
+      - username
+    ImportRowRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+      - username
+    IssueInputRequest:
+      type: object
+      properties:
+        team_id:
+          type: string
+          format: uuid
+      required:
+      - team_id
+    IssueOutput:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        certificate:
+          $ref: '#/components/schemas/CertificateOutput'
+      required:
+      - certificate
+      - url
+    LeaderboardOutput:
+      type: object
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/StandingOutput'
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesOutput'
+        generated_at:
+          type: string
+          format: date-time
+      required:
+      - generated_at
+      - series
+      - teams
+    LoginInputRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 1024
+      required:
+      - email
+      - password
+    PointOutput:
+      type: object
+      properties:
+        time:
+          type: string
+          format: date-time
+        score:
+          type: number
+          format: double
+      required:
+      - score
+      - time
+    RoleEnum:
+      enum:
+      - participant
+      - admin
+      type: string
+      description: |-
+        * `participant` - participant
+        * `admin` - admin
+    SeriesOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/PointOutput'
+      required:
+      - id
+      - name
+      - points
+    StandingOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        rank:
+          type: integer
+        score:
+          type: number
+          format: double
+        solved:
+          type: integer
+      required:
+      - id
+      - rank
+      - score
+      - solved
+      - username
+    StatusEnum:
+      enum:
+      - unconfigured
+      - upcoming
+      - live
+      - ended
+      type: string
+      description: |-
+        * `unconfigured` - unconfigured
+        * `upcoming` - upcoming
+        * `live` - live
+        * `ended` - ended
+    SubmitInputRequest:
+      type: object
+      properties:
+        flag:
+          type: string
+          minLength: 1
+          maxLength: 1024
+      required:
+      - flag
+    SubmitOutput:
+      type: object
+      properties:
+        detail:
+          type: string
+        already_solved:
+          type: boolean
+      required:
+      - already_solved
+      - detail
+    TypeEnum:
+      enum:
+      - audio
+      - video
+      - image
+      - zip
+      - pdf
+      - srt
+      - url
+      type: string
+      description: |-
+        * `audio` - audio
+        * `video` - video
+        * `image` - image
+        * `zip` - zip
+        * `pdf` - pdf
+        * `srt` - srt
+        * `url` - url
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
