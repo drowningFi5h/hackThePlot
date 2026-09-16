@@ -28,7 +28,7 @@ Each challenge has a point pool. The first solver gets a larger share, but the t
 
 For the kth solver among n teams, the score is:
 
-`pool / (k Ã— (1 + 1/2 + â€¦ + 1/n))`
+`pool / (k × (1 + 1/2 + … + 1/n))`
 
 For a 100-point challenge with two solvers, the first team gets about 66.67 points and the second gets 33.33. Earlier scores change when another team solves the same challenge. The chart uses current pool shares, so its final values match the leaderboard.
 

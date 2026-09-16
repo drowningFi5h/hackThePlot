@@ -55,7 +55,7 @@ test("team journey: login, locked challenge, solve, scoreboard, logout", async (
     page.getByRole("heading", { name: "The plot thickens" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Solved Â· revisit" }),
+    page.getByRole("link", { name: "Solved · revisit" }),
   ).toBeVisible();
   await page.goto("/scoreboard");
   await expect(page.getByRole("heading", { name: "Scorecard" })).toBeVisible();

@@ -30,7 +30,7 @@ export default function QuestionCard({ question }: { question: Challenge }) {
             className="inline-block rounded-full border border-violet-400/50 px-6 py-2 text-violet-300 hover:bg-violet-500/10"
             href={"/questions/" + question.no}
           >
-            {question.solved ? "Solved Â· revisit" : "Attempt"}
+            {question.solved ? "Solved · revisit" : "Attempt"}
           </Link>
         ) : (
           <p className="text-zinc-500">Solve previous questions to unlock</p>

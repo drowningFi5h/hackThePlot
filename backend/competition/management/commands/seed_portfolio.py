@@ -16,11 +16,14 @@ class Command(BaseCommand):
         if not settings.DEMO_MODE:
             raise CommandError("Set DEMO_MODE=1 only on a dedicated demo database.")
         Event.objects.select_for_update().get(pk=1)
+        Event.objects.filter(pk=1, name="TechHunt \u00c2\u00b7 Portfolio Demo").update(
+            name="TechHunt \u00b7 Portfolio Demo"
+        )
         if Challenge.objects.exists():
             self.stdout.write("Existing challenges preserved.")
             return
         Event.objects.filter(pk=1).update(
-            name="TechHunt Â· Portfolio Demo",
+            name="TechHunt · Portfolio Demo",
             starts_at=timezone.now() - timedelta(minutes=1),
             ends_at=timezone.now() + timedelta(days=14),
         )

@@ -133,7 +133,7 @@ export default function TeamImport() {
           <h2 className="text-xl mb-4">
             {result.dry_run
               ? "Validation preview"
-              : "Import complete â€” save credentials before leaving"}
+              : "Import complete — save credentials before leaving"}
           </h2>
           <table className="w-full text-left text-sm">
             <thead>

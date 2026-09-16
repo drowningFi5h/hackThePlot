@@ -19,7 +19,7 @@ export default function LoginPage() {
     <main className="w-screen min-h-screen bg-black">
       <div className="max-w-md w-full z-10 mx-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl p-8 border border-zinc-800 bg-black">
         <p className="text-violet-400 text-xs tracking-widest mb-3">
-          IIIT VADODARA Â· TECHHUNT
+          IIIT VADODARA · TECHHUNT
         </p>
         <h1 className="font-bold text-2xl text-white">Welcome to TechHunt</h1>
         <p className="text-neutral-400 text-sm mt-2">
@@ -106,7 +106,7 @@ export default function LoginPage() {
             disabled={busy}
             className="w-full rounded-md h-11 border border-zinc-700 bg-zinc-900 text-white disabled:opacity-50"
           >
-            {busy ? "Signing inâ€¦" : "Log in â†’"}
+            {busy ? "Signing in…" : "Log in →"}
           </button>
         </form>
         <p className="text-xs text-zinc-400">

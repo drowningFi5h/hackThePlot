@@ -46,7 +46,7 @@ export default function FlagForm({
           disabled={busy}
           className="rounded-full border border-violet-500 px-5 text-white disabled:opacity-50"
         >
-          {busy ? "Checkingâ€¦" : "Submit"}
+          {busy ? "Checking…" : "Submit"}
         </button>
       </div>
       {message && (

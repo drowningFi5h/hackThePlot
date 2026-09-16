@@ -42,7 +42,7 @@ export default function Scoreboard({ initial }: { initial: Board }) {
           delay = 15000;
         } catch {
           if (!stopped)
-            setError("Live updates paused. Retrying automaticallyâ€¦");
+            setError("Live updates paused. Retrying automatically…");
           delay = Math.min(delay * 2, 120000);
         }
       }
