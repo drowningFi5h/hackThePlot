@@ -1,4 +1,6 @@
-'use client';
+"use client";
+import Image from "next/image";
+
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -8,53 +10,69 @@ export const HoverEffect = ({
   items,
   className,
 }: {
-  items: ({
-    type: string;
-    url: string;
-  } | undefined) [];
+  items: (
+    | {
+        type: string;
+        url: string;
+      }
+    | undefined
+  )[];
   className?: string;
 }) => {
-  let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <div
-      className={cn(
-        "grid grid-cols-1 py-2",
-        className,
+    <div className={cn("grid grid-cols-1 py-2", className)}>
+      {items?.map(
+        (item, idx) =>
+          item && (
+            <Link
+              href={item?.url}
+              target="_blank"
+              key={item?.url}
+              className="relative group  block p-2 h-full w-full"
+              onMouseEnter={() => setHoveredIndex(idx)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <AnimatePresence>
+                {hoveredIndex === idx && (
+                  <motion.span
+                    className="absolute inset-0 h-full w-full bg-neutral-200 dark:bg-slate-800/[0.8] block rounded-3xl"
+                    layoutId="hoverBackground"
+                    initial={{ opacity: 0 }}
+                    animate={{
+                      opacity: 1,
+                      transition: { duration: 0.15 },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      transition: { duration: 0.15, delay: 0.2 },
+                    }}
+                  />
+                )}
+              </AnimatePresence>
+              <Card>
+                <CardTitle className="-mt-2 mb-4 capitalize">
+                  {item.type}
+                </CardTitle>
+                {["url", "zip", "audio"].includes(item.type) ? (
+                  <CardDescription>{item.url}</CardDescription>
+                ) : (
+                  item.type == "image" && (
+                    <Image
+                      src={item.url}
+                      width={800}
+                      height={600}
+                      unoptimized
+                      className="rounded-md"
+                      alt={item.url}
+                    />
+                  )
+                )}
+              </Card>
+            </Link>
+          ),
       )}
-    >
-      {items?.map((item, idx) => (
-        item && <Link
-          href={item?.url}
-          target="_blank"
-          key={item?.url}
-          className="relative group  block p-2 h-full w-full"
-          onMouseEnter={() => setHoveredIndex(idx)}
-          onMouseLeave={() => setHoveredIndex(null)}
-        >
-          <AnimatePresence>
-            {hoveredIndex === idx && (
-              <motion.span
-                className="absolute inset-0 h-full w-full bg-neutral-200 dark:bg-slate-800/[0.8] block rounded-3xl"
-                layoutId="hoverBackground"
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: 1,
-                  transition: { duration: 0.15 },
-                }}
-                exit={{
-                  opacity: 0,
-                  transition: { duration: 0.15, delay: 0.2 },
-                }}
-              />
-            )}
-          </AnimatePresence>
-          <Card>
-            <CardTitle className="-mt-2 mb-4 capitalize">{item.type}</CardTitle>
-            {["url" ,"zip" ,"audio"].includes(item.type)  ? <CardDescription>{item.url}</CardDescription> : item.type == "image" && <img src={item.url} className="rounded-md" alt={item.url}/>}
-          </Card>
-        </Link>
-      ))}
     </div>
   );
 };

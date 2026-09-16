@@ -1,50 +1,50 @@
-import { db } from "@/drizzle";
-import { asc, eq } from "drizzle-orm";
-import { questionTable, submissionTable, userTable } from "@/drizzle/schema";
-import { auth } from "@/functions/auth";
+import Link from "next/link";
+import { serverApi } from "@/lib/server-api";
+import { ApiError, Challenge } from "@/lib/api";
 import QuestionCard from "@/components/question-card";
 import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
-
 export default async function Questions() {
-  const payload = await auth();
-  const [questions, completed] = await Promise.all([
-    db.query.questionTable.findMany({
-      orderBy: [asc(questionTable.no)],
-    }),
-    db.query.submissionTable.findMany({
-      where: eq(submissionTable.user_id, payload.id),
-      with: {
-        question: true,
-      },
-    }),
-  ]);
-
-  const user = await db.query.userTable.findFirst({
-    where: eq(userTable.id, payload.id),
-  });
-
+  let questions: Challenge[];
+  try {
+    questions = await serverApi<Challenge[]>("challenges/");
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 403)
+      return (
+        <main className="p-8 text-white">
+          <h1 className="text-2xl mb-4">The hunt is resting</h1>
+          <p>{e.message}</p>
+          <Link href="/questions" className="text-violet-400 underline">
+            Check again
+          </Link>
+        </main>
+      );
+    throw e;
+  }
   return (
     <BackgroundBeamsWithCollision>
-      <div className="min-h-screen h-screen overflow-auto w-screen text-gray-200 p-8">
-        <div className="text-8xl relative font-extrabold mb-8 text-center font-bold text-white text-transparent bg-clip-text bg-no-repeat bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]">
-          <h1 className="opacity-[.10] text-center overflow-hidden whitespace-nowrap pb-4">
-            13 Reasons Why
-          </h1>
-          <span className="absolute left-0 right-0 bottom-4 m-auto text-6xl opacity-[0.80]">
-            The Hunt
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {questions.map((question) => (
-            <QuestionCard
-              question={question}
-              progress={user?.progress || 0}
-              key={question.id}
-            />
+      <main className="w-full h-screen overflow-auto p-6 md:p-10">
+        <h1 className="text-white text-3xl font-bold mb-2">
+          The plot thickens
+        </h1>
+        <p className="text-zinc-400 mb-8">
+          Follow the clues. Each solve unlocks your next challenge.
+        </p>
+        {questions.length > 0 && questions.every((q) => q.solved) && (
+          <p className="text-violet-400 mb-6">
+            You solved every challenge. Well played!
+          </p>
+        )}
+        {!questions.length && (
+          <p className="text-zinc-400">
+            Your organizers are preparing the challenges.
+          </p>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+          {questions.map((q) => (
+            <QuestionCard key={q.id} question={q} />
           ))}
         </div>
-      </div>
+      </main>
     </BackgroundBeamsWithCollision>
   );
 }

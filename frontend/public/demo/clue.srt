@@ -1,0 +1,11 @@
+1
+00:00:00,000 --> 00:00:00,499
+A signal in the silence.
+
+2
+00:00:00,500 --> 00:00:02,300
+Three short tones. The trail begins here.
+
+3
+00:00:02,301 --> 00:00:03,000
+End of the practice signal.

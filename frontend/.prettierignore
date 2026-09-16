@@ -1,0 +1,4 @@
+src/types/api.d.ts
+.next/
+node_modules/
+next-env.d.ts

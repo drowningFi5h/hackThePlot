@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import srtParser2 from "srt-parser-2";
-import Cookies from "js-cookie";
+
 import { Button } from "./ui/button";
 import { ChevronsUpDown, Pause, Play } from "lucide-react";
 import {
@@ -21,6 +21,7 @@ export default function AudioPlayer({
   audio: string;
   questionNumber: string;
 }) {
+  const ready = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -30,24 +31,12 @@ export default function AudioPlayer({
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Check if the audio has been fully played before for the given question
-  useEffect(() => {
-    const playedBefore = Cookies.get(`audioPlayed_${questionNumber}`);
-    setIsFirstPlay(!playedBefore);
-
-    if (audioRef.current) {
-      // Set initial currentTime and duration when component mounts
-      setCurrentTime(audioRef.current.currentTime || 0);
-      setDuration(audioRef.current.duration || 0);
-    }
-  }, [questionNumber]);
-
   const handlePlayPause = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        void audioRef.current.play().catch(() => setIsPlaying(false));
       }
       setIsPlaying(!isPlaying);
     }
@@ -66,7 +55,11 @@ export default function AudioPlayer({
 
       // Check if audio has been played completely
       if (current === duration) {
-        Cookies.set(`audioPlayed_${questionNumber}`, "true", { expires: 1 });
+        try {
+          sessionStorage.setItem(`audioPlayed_${questionNumber}`, "true");
+        } catch {
+          /* Storage can be disabled. */
+        }
         setIsFirstPlay(false);
       }
     }
@@ -75,6 +68,13 @@ export default function AudioPlayer({
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
+      try {
+        setIsFirstPlay(
+          !sessionStorage.getItem(`audioPlayed_${questionNumber}`),
+        );
+      } catch {
+        setIsFirstPlay(true);
+      }
     }
   };
 
@@ -109,6 +109,8 @@ export default function AudioPlayer({
         />
         <div className="flex items-center w-full max-w-[40rem] mx-auto space-x-4 border text-white p-2 px-4 rounded-full">
           <Button
+            disabled={!ready}
+            aria-label={isPlaying ? "Pause audio" : "Play audio"}
             onClick={handlePlayPause}
             className="ext-white hover:text-gray-300"
             variant="ghost"
@@ -121,6 +123,7 @@ export default function AudioPlayer({
             )}
           </Button>
           <input
+            aria-label="Audio position"
             type="range"
             min="0"
             max={duration}
@@ -141,9 +144,21 @@ export default function AudioPlayer({
         className="w-full space-y-2"
       >
         <div className="flex items-center justify-between space-x-4 px-4">
-          <h4 className="text-sm font-semibold cursor-pointer" onClick={() => {setIsOpen((isOpen) => !isOpen)}}>Transcribe</h4>
+          <h4
+            className="text-sm font-semibold cursor-pointer"
+            onClick={() => {
+              setIsOpen((isOpen) => !isOpen);
+            }}
+          >
+            Transcribe
+          </h4>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="w-9 p-0 border !mr-auto">
+            <Button
+              disabled={!ready}
+              variant="ghost"
+              size="sm"
+              className="w-9 p-0 border !mr-auto"
+            >
               <ChevronsUpDown className="h-4 w-4" />
               <span className="sr-only">Toggle</span>
             </Button>
@@ -153,10 +168,7 @@ export default function AudioPlayer({
           {srt.map((obj, index) => {
             if (index <= srtIndex) {
               return (
-                <div
-                  key={index}
-                  className={`p-2 rounded`}
-                >
+                <div key={index} className={`p-2 rounded`}>
                   <div
                     className={`${
                       srtIndex === index ? "text-gray-500" : "text-gray-600"

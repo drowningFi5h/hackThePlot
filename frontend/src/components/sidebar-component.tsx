@@ -16,7 +16,13 @@ import { ReactNode } from "react";
 import { Payload } from "@/types/Payload";
 import { AnimatedTooltip } from "./ui/animated-tooltip";
 
-export default function SidebarDemo({ children, user }: { children: ReactNode, user: Payload }) {
+export default function SidebarDemo({
+  children,
+  user,
+}: {
+  children: ReactNode;
+  user: Payload;
+}) {
   const links = [
     {
       label: "Questions",
@@ -105,9 +111,9 @@ export default function SidebarDemo({ children, user }: { children: ReactNode, u
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                link && <SidebarLink key={idx} link={link} />
-              ))}
+              {links.map(
+                (link, idx) => link && <SidebarLink key={idx} link={link} />,
+              )}
             </div>
           </div>
           <div>
@@ -126,9 +132,8 @@ export default function SidebarDemo({ children, user }: { children: ReactNode, u
                 ),
               }}
             />
-            
 
-          {/* <AnimatedTooltip items={people} /> */}
+            {/* <AnimatedTooltip items={people} /> */}
           </div>
         </SidebarBody>
       </Sidebar>
@@ -142,7 +147,13 @@ export const Logo = () => {
       href="#"
       className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
     >
-      <Image src={"https://i.imgur.com/XDemAsx.png"} alt={"HTP"} width={2880} height={2880} className="w-6"/>
+      <Image
+        src={"https://i.imgur.com/XDemAsx.png"}
+        alt={"HTP"}
+        width={2880}
+        height={2880}
+        className="w-6"
+      />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -160,7 +171,13 @@ export const LogoIcon = () => {
       href="#"
       className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
     >
-      <Image src={"https://i.imgur.com/XDemAsx.png"} alt={"HTP"} width={2880} height={2880} className="w-6"/>
+      <Image
+        src={"https://i.imgur.com/XDemAsx.png"}
+        alt={"HTP"}
+        width={2880}
+        height={2880}
+        className="w-6"
+      />
     </Link>
   );
 };

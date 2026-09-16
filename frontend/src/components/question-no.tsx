@@ -1,108 +1,85 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
 import AudioCaptionPlayer from "@/components/AudioCaptionPlayer";
-import {
-  Card,
-  CardTitle,
-  HoverEffect,
-} from "@/components/ui/card-hover-effect";
-import { db } from "@/drizzle";
-import { transcriptTable } from "@/drizzle/schema";
-import { Question } from "@/types/General";
-import { eq } from "drizzle-orm";
 import FlagForm from "./FlagForm";
-import { CardHeader, CardContent } from "./ui/card";
-
-export const assetsPanel = (question: Question) => {
-  const assets = question.assets?.map((asset) => {
-    if (asset.downloadable && !asset.transcript) {
-      return {
-        type: asset.type,
-        url: asset.url,
-      };
-    }
-  });
+import type { Challenge } from "@/lib/api";
+export function assetsPanel(question: Challenge) {
+  const assets = question.assets.filter((a) => a.downloadable);
   return (
-    <Card className="min-h-[50%] h-fit md:h-full p-0 rounded-lg z-0 overflow-auto">
-      <CardHeader>
-        <CardTitle>Assets</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-full">
-          {assets && assets.length > 0 ? <HoverEffect items={assets} /> : null}
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    <section className="rounded-lg border border-zinc-800 bg-black p-6 h-full">
+      <h2 className="text-lg font-semibold mb-5 text-white">Assets</h2>
+      {!assets.length && (
+        <p className="text-zinc-500">No downloads for this challenge.</p>
+      )}
+      <div className="space-y-3">
+        {assets.map((a) => (
+          <a
+            key={a.id}
+            href={a.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block border border-zinc-800 hover:border-violet-500 rounded-lg p-4 text-violet-300"
+          >
+            {a.name}{" "}
+            <span className="text-zinc-500 text-xs uppercase">{a.type}</span>
+          </a>
+        ))}
+      </div>
+    </section>
   );
-};
-
-export const QuestionPanel = (props: {
-  type: boolean;
-  question: Question;
+}
+export function QuestionPanel({
+  question,
+  attempt,
+}: {
+  question: Challenge;
   attempt: boolean;
-}) => {
+  type?: boolean;
+}) {
   return (
-    <div
-      className={`flex flex-col ${
-        props.type ? "h-full" : "min-h-[60%] max-h-[80%]"
-      } bg-black border border-zinc-800 rounded-lg text-white`}
-    >
-      <div className="p-6 px-8 border-b border-zinc-800">
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-white opacity-75">
-            {props.question.no}.
-          </span>
-          <h1 className="text-xl font-semibold">{props.question.title}</h1>
-        </div>
-        {props.question.question && (
-          <div className="mt-1 text-sm text-zinc-400 mb-4 break-words">
-            {props.question.question}
-          </div>
-        )}
-        <div className="mt-1 text-sm text-zinc-400">
-          Points: <span className="text-[#8b5cf6]">{props.question.score}</span>
-        </div>
+    <section className="rounded-lg border border-zinc-800 bg-black text-white flex flex-col h-full">
+      <div className="p-6 border-b border-zinc-800">
+        <h1 className="text-xl font-semibold">
+          {question.no}. {question.title}
+        </h1>
+        <p className="whitespace-pre-wrap text-zinc-400 mt-4">
+          {question.question}
+        </p>
+        <p className="text-sm text-violet-400 mt-4">
+          {question.score} point pool
+        </p>
       </div>
-      <ScrollArea className="flex-1 p-4 overflow-auto">
-        <div className="space-y-4">
-          {props.question.assets?.map(async (asset) => {
-            if (
-              asset.type == "audio" &&
-              !asset.downloadable &&
-              asset.transcript
-            ) {
-              const transcript = await db.query.transcriptTable.findFirst({
-                where: eq(transcriptTable.audio_id, asset.transcript.audio_id),
-                with: {
-                  audio: {
-                    columns: {
-                      url: true,
-                    },
-                  },
-                  transcript: {
-                    columns: {
-                      url: true,
-                    },
-                  },
-                },
-              });
-              if (!transcript) return null;
-              return (
-                <AudioCaptionPlayer
-                  key={asset.id}
-                  srt_url={transcript.transcript.url}
-                  audio_url={transcript.audio.url}
-                  questionNumber={props.question.no.toString()}
-                />
-              );
-            }
-          })}
-        </div>
-      </ScrollArea>
-      <div className="p-4 border-t border-zinc-800 mt-auto">
-        {props.attempt && (
-          <FlagForm type={props.type} question={props.question} />
-        )}
+      <div className="p-6 flex-1 space-y-5">
+        {question.assets
+          .filter((a) => !a.downloadable)
+          .map((a) =>
+            a.type === "audio" && a.transcript_url ? (
+              <AudioCaptionPlayer
+                key={a.id}
+                audio_url={a.url}
+                srt_url={a.transcript_url}
+                questionNumber={String(question.no)}
+              />
+            ) : a.type === "audio" ? (
+              <audio key={a.id} controls src={a.url} className="w-full" />
+            ) : a.type === "video" ? (
+              <video key={a.id} controls src={a.url} className="w-full" />
+            ) : (
+              <a
+                key={a.id}
+                href={a.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-violet-400 underline"
+              >
+                {a.name}
+              </a>
+            ),
+          )}
       </div>
-    </div>
+      {attempt && (
+        <div className="p-5 border-t border-zinc-800">
+          <FlagForm question={question} />
+        </div>
+      )}
+    </section>
   );
-};
+}

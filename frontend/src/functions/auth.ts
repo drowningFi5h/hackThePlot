@@ -1,29 +1,12 @@
-import { jwtVerify, SignJWT } from "jose";
-import { cookies } from "next/headers";
-import { Payload } from "@/types/Payload";
-
-export async function auth() {
-  const secret = new TextEncoder().encode(process.env.AUTH_SECRET);
-  const jwt = (await cookies()).get("access_token")?.value;
-
-  if (!jwt) {
-    throw new Error("No token found");
-  }
+import { redirect } from "next/navigation";
+import { serverApi } from "@/lib/server-api";
+import { Account, ApiError } from "@/lib/api";
+export async function auth(): Promise<Account> {
   try {
-    const { payload }: { payload: Payload } = await jwtVerify(jwt, secret);
-    return payload;
-  } catch (e: any) {
-    throw new Error(e.toString());
+    return await serverApi<Account>("auth/me/");
+  } catch (error) {
+    if (error instanceof ApiError && [401, 403].includes(error.status))
+      redirect("/");
+    throw error;
   }
-}
-
-export async function generateJWT(payload: Payload) {
-  const secret = new TextEncoder().encode(process.env.AUTH_SECRET);
-  const alg = "HS256";
-
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg })
-    .setIssuedAt()
-    .setExpirationTime("4w")
-    .sign(secret);
 }

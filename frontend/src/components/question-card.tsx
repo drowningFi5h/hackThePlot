@@ -6,47 +6,36 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Lock, CheckCircle } from "lucide-react";
-import { Question } from "@/types/General";
+import type { Challenge } from "@/lib/api";
 import Link from "next/link";
-import { HoverBorderGradient } from "./ui/hover-border-gradient";
-
-const QuestionCard = (props: { question: Question; progress: number }) => {
-  const question: Question = props.question;
-  const progress: number = props.progress;
-
+export default function QuestionCard({ question }: { question: Challenge }) {
   return (
-    <Card key={question.id} className="bg-black border-gray-1000 shadow-xl ">
+    <Card className="bg-black border-zinc-800 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold text-white flex items-center justify-between">
+        <CardTitle className="text-xl text-white flex justify-between">
           {question.title}
-          {question.no < progress && <CheckCircle className="text-[#8b5cf6]" />}
-          {question.no > progress && <Lock className="text-gray-500" />}
+          {question.solved ? (
+            <CheckCircle className="text-violet-400" />
+          ) : !question.unlocked ? (
+            <Lock className="text-zinc-500" />
+          ) : null}
         </CardTitle>
-        <CardDescription className="text-gray-400">
-          {question.score} points
+        <CardDescription className="text-zinc-400">
+          {question.score} point pool
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {question.no < progress && <p className="text-[#8b5cf6]">Solved!</p>}
-        {question.no == progress && (
-          <Link href={`/questions/${question.no}`} className="bg-none">
-            <HoverBorderGradient
-              containerClassName="rounded-full"
-              as="button"
-              className="bg-black text-black dark:text-white flex items-center space-x-4 px-8 sm:w-full"
-            >
-              <span className="w-full bg-black hover:bg-black text-white">
-                Attempt
-              </span>
-            </HoverBorderGradient>
+        {question.unlocked ? (
+          <Link
+            className="inline-block rounded-full border border-violet-400/50 px-6 py-2 text-violet-300 hover:bg-violet-500/10"
+            href={"/questions/" + question.no}
+          >
+            {question.solved ? "Solved Â· revisit" : "Attempt"}
           </Link>
-        )}
-        {question.no > progress && (
-          <p className="text-gray-500">Solve previous questions to unlock</p>
+        ) : (
+          <p className="text-zinc-500">Solve previous questions to unlock</p>
         )}
       </CardContent>
     </Card>
   );
-};
-
-export default QuestionCard;
+}
