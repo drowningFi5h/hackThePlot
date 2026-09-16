@@ -1,0 +1,79 @@
+name: Verify migration
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.13-alpine
+        env:
+          POSTGRES_USER: htp
+          POSTGRES_PASSWORD: htp
+          POSTGRES_DB: htp
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U htp"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DJANGO_DEBUG: "1"
+      DATABASE_URL: postgresql://htp:htp@127.0.0.1:5432/htp
+      BACKEND_URL: http://127.0.0.1:8000
+      FRONTEND_URL: http://localhost:3000
+      CSRF_TRUSTED_ORIGINS: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.10.4"
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: uv sync --locked
+        working-directory: backend
+      - run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run manage.py makemigrations --check --dry-run
+          uv run manage.py test --settings=config.test_settings
+          uv run manage.py migrate --noinput
+          uv run manage.py spectacular --file ../docs/openapi.yaml --validate --fail-on-warn
+        working-directory: backend
+      - run: npm ci
+        working-directory: frontend
+      - run: |
+          npm run api:types
+          npm run lint
+          npm run typecheck
+          npm run build
+        working-directory: frontend
+      - run: git diff --exit-code docs/openapi.yaml frontend/src/types/api.d.ts
+      - run: |
+          cd backend
+          uv run manage.py seed_demo
+          uv run manage.py seed_browser_fixtures
+          uv run gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --threads 2 > /tmp/htp-backend.log 2>&1 &
+          cd ../frontend
+          npm start > /tmp/htp-frontend.log 2>&1 &
+      - run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3000/ >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npm run test:e2e
+        working-directory: frontend
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-results
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+            docs/screenshots/
