@@ -56,7 +56,7 @@ jobs:
           cd backend
           uv run manage.py seed_demo
           uv run manage.py seed_browser_fixtures
-          uv run gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --threads 2 > /tmp/htp-backend.log 2>&1 &
+          .venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --threads 2 > /tmp/htp-backend.log 2>&1 &
           cd ../frontend
           npm start > /tmp/htp-frontend.log 2>&1 &
       - run: |
