@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { api, Challenge } from "@/lib/api";
@@ -10,10 +10,12 @@ export default function FlagForm({
   type?: boolean;
 }) {
   const router = useRouter();
+  const ready = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   return (
     <form
+      method="post"
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
@@ -43,7 +45,7 @@ export default function FlagForm({
           className="bg-black text-white rounded-full"
         />
         <button
-          disabled={busy}
+          disabled={busy || !ready}
           className="rounded-full border border-violet-500 px-5 text-white disabled:opacity-50"
         >
           {busy ? "Checking…" : "Submit"}

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label_2";
 import { Input } from "@/components/ui/input_2";
@@ -7,6 +7,7 @@ import { BackgroundBeams } from "@/components/ui/background-beams";
 import { api, Account, EventInfo } from "@/lib/api";
 export default function LoginPage() {
   const router = useRouter();
+  const ready = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [event, setEvent] = useState<EventInfo | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -31,7 +32,7 @@ export default function LoginPage() {
               Portfolio demo · practice challenges, synthetic teams.
             </p>
             <button
-              disabled={busy}
+              disabled={busy || !ready}
               className="w-full bg-violet-600 hover:bg-violet-500 rounded-md py-2 text-white"
               onClick={async () => {
                 setBusy(true);
@@ -54,6 +55,7 @@ export default function LoginPage() {
           </div>
         )}
         <form
+      method="post"
           className="my-8 space-y-5"
           onSubmit={async (e) => {
             e.preventDefault();
@@ -103,7 +105,7 @@ export default function LoginPage() {
             </p>
           )}
           <button
-            disabled={busy}
+            disabled={busy || !ready}
             className="w-full rounded-md h-11 border border-zinc-700 bg-zinc-900 text-white disabled:opacity-50"
           >
             {busy ? "Signing in…" : "Log in →"}

@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 });
 const password = process.env.DEMO_PASSWORD || "Demo-only-password-2026!";
 test("team journey: login, locked challenge, solve, scoreboard, logout", async ({
-  page,
+  page, browser,
 }, info) => {
   const team = info.project.name === "mobile" ? 2 : 1;
   await page.goto("/");
@@ -32,6 +32,12 @@ test("team journey: login, locked challenge, solve, scoreboard, logout", async (
     path: "../docs/screenshots/questions-" + info.project.name + ".png",
     fullPage: true,
   });
+  const noJs = await browser.newContext({ javaScriptEnabled: false, storageState: await page.context().storageState() });
+  const noJsPage = await noJs.newPage();
+  await noJsPage.goto(new URL("/questions/0", page.url()).href);
+  await expect(noJsPage.getByRole("button", { name: "Submit", exact: true })).toBeDisabled();
+  await expect(noJsPage.locator("form")).toHaveAttribute("method", "post");
+  await noJs.close();
   await page
     .getByRole("link", { name: "Attempt", exact: true })
     .first()
@@ -135,4 +141,13 @@ test("synthetic certificate verifies in the frontend", async ({ page }) => {
   await expect(
     page.getByText("Practice Team 3", { exact: true }),
   ).toBeVisible();
+});
+
+test("login cannot submit secrets before JavaScript is ready", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(baseURL!);
+  await expect(page.getByRole("button", { name: /Log in/ })).toBeDisabled();
+  await expect(page.locator("form")).toHaveAttribute("method", "post");
+  await context.close();
 });
