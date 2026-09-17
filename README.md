@@ -2,21 +2,17 @@
 
 Hack The Plot is a custom CTF hosting platform for TechHunt at IIIT Vadodara. Teams work through challenges, submit flags, and follow their progress on a shared scoreboard.
 
-This repository is a Django adaptation of the original TechHunt application. I kept the original Next.js interface and moved authentication, challenge access, scoring, team registration, and certificate verification into a separate Django backend backed by PostgreSQL.
+Built on the [original TechHunt app](https://github.com/SteakFisher/hacktheplot), this version keeps the Next.js interface and uses Django and PostgreSQL for accounts, challenges, scoring, and certificates.
 
 **[Open the live demo](https://hack-the-plot-iiitv.vercel.app)** and choose **Try the demo**. The free backend may need about a minute to wake up. The login page retries automatically while it starts.
 
-The public deployment is a **portfolio demo**. Its clues and teams are synthetic. It is not an active college competition.
-
 ## What you can try
 
-- Enter the portfolio demo as a guest, without sharing your email.
+- Try the challenges as a guest—no email needed.
 - Work through three practice challenges. Each solve unlocks the next one.
 - Watch the leaderboard change as teams solve challenges.
 - Play audio clues with synchronized SRT captions when an organizer adds them.
 - Organizers can import teams from CSV, manage challenges in Django admin, and issue or revoke certificates after an event.
-
-The original app's dark interface and purple accents remain. Rasputin/device pairing and the later Halloween redesign are outside this version.
 
 ## Screenshots
 
@@ -56,9 +52,9 @@ Development-only accounts:
 | Team | team1@example.test | Demo-only-password-2026! |
 | Organizer | organizer@example.test | Demo-only-password-2026! |
 
-These are synthetic local accounts. `seed_demo` refuses to run with production settings. Never reuse its passwords for your organizer account.
+These accounts are for local testing. Use your own credentials when deploying; `seed_demo` only runs in development mode.
 
-For guest entry locally, set `DEMO_MODE: "1"` in the backend Compose environment and recreate the backend. Its startup command seeds portfolio challenges only if the database has no challenges.
+For guest entry locally, set `DEMO_MODE: "1"` in the backend Compose environment and recreate the backend. Its startup command adds practice challenges only if the database has no challenges.
 
 ### Work on the code
 
@@ -125,24 +121,6 @@ npm run build
 npm run test:e2e
 ```
 
-Tests need PostgreSQL and the development environment variables. Browser tests need both servers running and a fresh `seed_demo` database followed by `seed_browser_fixtures`. They exercise desktop/mobile journeys, CSV imports, and proxy protections. GitHub Actions provisions those dependencies.
+Tests need PostgreSQL and the development environment variables. Browser tests need both servers running and a fresh `seed_demo` database followed by `seed_browser_fixtures`. They cover login, solving challenges, CSV imports, and access checks on desktop and mobile. GitHub Actions handles the setup for CI.
 
-The [OpenAPI contract](docs/openapi.yaml) generates the TypeScript API types. [Deployment instructions](docs/deployment.md), [backup/restore instructions](docs/operations.md), and [verification results](docs/verification.md) describe the operational details and limits.
-
-## Two-week hosting
-
-The deployment targets Vercel Hobby, Render Free, and Render Free PostgreSQL. The backend can sleep, and the free database expires after 30 days. This is suitable for a short portfolio demonstration, not a promise of production availability. Certificate verification also needs the backend to remain online.
-
-See [the deployment guide](docs/deployment.md) before creating the database. The repository does not include paid services or a keep-alive workaround.
-
-## What I would improve next
-
-For a permanent resume link, the first priority is a database that does not expire. I would also add event archives and challenge versioning, so organizers can run a new hunt without changing old results. The current launch deliberately uses a fresh database and fixed challenge definitions after the first solve.
-
-## Where this version started
-
-The frontend comes from [SteakFisher/hacktheplot](https://github.com/SteakFisher/hacktheplot), by the original TechHunt team, including [SteakFisher](https://github.com/SteakFisher) and [TheDevyashSaini](https://github.com/TheDevyashSaini). The UI also credits Jaydeep, Devyash, Kunj, and Srishti.
-
-This adaptation starts at [d518d0e82339](https://github.com/SteakFisher/hacktheplot/commit/d518d0e82339a3ce1552379f0301bbc446d7c56a), the 69th commit counting from the start of the upstream history inspected for this migration. Original authors and timestamps are preserved. Django migration commits use their actual implementation dates.
-
-The original repository did not include a license file at that revision; this adaptation does not invent a license for upstream work.
+The [OpenAPI contract](docs/openapi.yaml) generates the TypeScript API types. [Deployment instructions](docs/deployment.md), [backup/restore instructions](docs/operations.md), and [verification results](docs/verification.md) cover hosting, backups, and test results.
