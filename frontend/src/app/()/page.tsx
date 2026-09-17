@@ -9,12 +9,29 @@ export default function LoginPage() {
   const router = useRouter();
   const ready = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [event, setEvent] = useState<EventInfo | null>(null);
+  const [eventError, setEventError] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    api<EventInfo>("event/")
-      .then(setEvent)
-      .catch(() => {});
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    let attempts = 0;
+    const load = async () => {
+      try {
+        const result = await api<EventInfo>("event/");
+        if (!cancelled) {
+          setEvent(result);
+          setEventError("");
+        }
+      } catch {
+        if (!cancelled) {
+          setEventError("The demo server is waking up. Retrying shortly...");
+          timer = setTimeout(load, Math.min(30000, 3000 * 2 ** attempts++));
+        }
+      }
+    };
+    void load();
+    return () => { cancelled = true; clearTimeout(timer); };
   }, []);
   return (
     <main className="w-screen min-h-screen bg-black">
@@ -112,7 +129,7 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="text-xs text-zinc-400">
-          {event?.status === "live"
+          {eventError || (event?.status === "live"
             ? "The hunt is live."
             : event?.starts_at
               ? "Starts " +
@@ -120,7 +137,7 @@ export default function LoginPage() {
                   timeZone: "Asia/Kolkata",
                 }) +
                 " IST. You can sign in now."
-              : "Your organizers will announce the start time."}
+              : "Your organizers will announce the start time.")}
         </p>
       </div>
       <BackgroundBeams className="pointer-events-none" />

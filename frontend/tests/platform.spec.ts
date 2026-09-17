@@ -151,3 +151,16 @@ test("login cannot submit secrets before JavaScript is ready", async ({ browser,
   await expect(page.locator("form")).toHaveAttribute("method", "post");
   await context.close();
 });
+
+test("event status recovers after a sleeping backend wakes", async ({ page }) => {
+  let attempts = 0;
+  await page.route("**/api/v1/event/**", async (route) => {
+    attempts += 1;
+    if (attempts === 1) return route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ detail: "Waking up" }) });
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ name: "Practice", status: "live", demo_mode: true, starts_at: null, ends_at: null, server_time: new Date().toISOString() }) });
+  });
+  await page.goto("/");
+  await expect(page.getByText("The demo server is waking up. Retrying shortly...")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Try the demo", exact: true })).toBeVisible();
+  await expect(page.getByText("The hunt is live.")).toBeVisible();
+});
