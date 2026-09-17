@@ -35,7 +35,7 @@ test("team journey: login, locked challenge, solve, scoreboard, logout", async (
   const noJs = await browser.newContext({ javaScriptEnabled: false, storageState: await page.context().storageState() });
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(new URL("/questions/0", page.url()).href);
-  await expect(noJsPage.getByRole("button", { name: "Submit", exact: true })).toBeDisabled();
+  await expect(noJsPage.getByRole("button", { name: "Submit", exact: true, includeHidden: true })).toBeDisabled();
   await expect(noJsPage.locator("form")).toHaveAttribute("method", "post");
   await noJs.close();
   await page
