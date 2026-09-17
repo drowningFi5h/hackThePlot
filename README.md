@@ -4,6 +4,8 @@ Hack The Plot is a custom CTF hosting platform for TechHunt at IIIT Vadodara. Te
 
 This repository is a Django adaptation of the original TechHunt application. I kept the original Next.js interface and moved authentication, challenge access, scoring, team registration, and certificate verification into a separate Django backend backed by PostgreSQL.
 
+**[Open the live demo](https://hack-the-plot-iiitv.vercel.app)** and choose **Try the demo**. The free backend may need about a minute to wake up. The login page retries automatically while it starts.
+
 The public deployment is a **portfolio demo**. Its clues and teams are synthetic. It is not an active college competition.
 
 ## What you can try
@@ -132,6 +134,10 @@ The [OpenAPI contract](docs/openapi.yaml) generates the TypeScript API types. [D
 The deployment targets Vercel Hobby, Render Free, and Render Free PostgreSQL. The backend can sleep, and the free database expires after 30 days. This is suitable for a short portfolio demonstration, not a promise of production availability. Certificate verification also needs the backend to remain online.
 
 See [the deployment guide](docs/deployment.md) before creating the database. The repository does not include paid services or a keep-alive workaround.
+
+## What I would improve next
+
+For a permanent resume link, the first priority is a database that does not expire. I would also add event archives and challenge versioning, so organizers can run a new hunt without changing old results. The current launch deliberately uses a fresh database and fixed challenge definitions after the first solve.
 
 ## Where this version started
 

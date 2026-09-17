@@ -13,6 +13,10 @@ Checks run on the local Windows development machine with Docker PostgreSQL 16.13
 
 The load test used Django's local threaded development server, 100 authenticated team sessions and up to 20 simultaneous in-flight request workers. Login ramp used 8 workers. It is not a benchmark of Render Free, a production SLA, or a claim about 100 simultaneous CPU-bound operations.
 
-The backend Docker image builds, runs as the unprivileged app user, and passes readiness. Frontend lint, TypeScript checking, and the production build passed. All eight desktop/mobile browser scenarios passed (desktop rerun after fixing hydration timing). They cover audio/captions, login/logout, challenge submission, CSV import, proxy restrictions, and certificate verification. npm audit reported zero vulnerabilities. Screenshots are in `docs/screenshots/`.
+The backend Docker image builds, runs as the unprivileged app user, and passes readiness. Frontend lint, TypeScript checking, and the production build passed. All twelve desktop/mobile browser scenarios passed in GitHub Actions, including pre-hydration form safety and simulated cold-start recovery. They cover audio/captions, login/logout, challenge submission, CSV import, proxy restrictions, and certificate verification. npm audit reported zero vulnerabilities. Screenshots are in `docs/screenshots/`.
 
-Live hosting verification is pending deployment.
+[GitHub Actions verification](https://github.com/drowningFi5h/hackThePlot/actions/runs/35256585379) passed on commit `f4aa392`, using a clean Linux checkout, PostgreSQL, and Chromium desktop/mobile journeys.
+
+Live verification on Vercel Hobby and Render Free passed: database readiness, guest session creation, HTTPS media and captions, all three challenge solves (0, 2, 7), final completion, a 600-point scoreboard/chart total, logout, and protected-page redirection. A backend redeployment retained the guest session and practice data. Production form markup uses POST and disables submission before hydration.
+
+The 100-team load numbers above remain local measurements. No 100-team capacity claim is made for the free production instance. Real idle-to-warm timing, production backup restoration, and a production rollback have not been rehearsed; backup restoration and restart persistence were verified locally. Daily scheduled backups are not configured for this synthetic demo.

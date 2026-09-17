@@ -69,3 +69,13 @@ Auto-deploy is disabled for the backend. Apply a tested release manually, after 
 After two weeks, export standings/certificates and take a final encrypted backup. Remove the deployment when no longer needed. Certificate URLs require the backend; preserve verification exports if they matter.
 
 The README should list a live URL only after the deployed frontend/backend have been verified together.
+
+## Current demo resources
+
+The free Render database was created on September 17, 2026. Render reports an expiry date of **October 17, 2026**. Export anything worth keeping before expiry. The intended two-week demonstration ends October 1, 2026. No paid upgrade or storage autoscaling was enabled.
+
+Frontend: https://hack-the-plot-iiitv.vercel.app
+
+Django readiness: https://hacktheplot-api.onrender.com/health/ready/
+
+Both services use free provider subdomains. Vercel deploys `frontend/` from `main`. Render uses the root Blueprint with the backend Docker context; deployments are manual. The PostgreSQL instance is in Singapore, with external database access blocked. No public organizer account was created.
