@@ -45,7 +45,7 @@ def submit(team, challenge_id, flag):
             raise PermissionDenied("Solve the current challenge first.")
         if not challenge.matches(flag):
             raise ValidationError({"detail": "Wrong flag. Try again."})
-        # Recheck after the expensive password hash to enforce the deadline.
+        # Check the deadline again before recording the solve.
         require_live()
         position = Submission.objects.filter(challenge=challenge).count() + 1
         Submission.objects.create(team=team, challenge=challenge, position=position)

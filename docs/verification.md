@@ -15,7 +15,7 @@ The load test used Django's local threaded development server, 100 authenticated
 
 The backend Docker image builds, runs as the unprivileged app user, and passes readiness. Frontend lint, TypeScript checking, and the production build passed. All twelve desktop/mobile browser scenarios passed in GitHub Actions, including pre-hydration form safety and simulated cold-start recovery. They cover audio/captions, login/logout, challenge submission, CSV import, proxy restrictions, and certificate verification. npm audit reported zero vulnerabilities. Screenshots are in `docs/screenshots/`.
 
-[GitHub Actions verification](https://github.com/drowningFi5h/hackThePlot/actions/runs/35256585379) passed on commit `f4aa392`, using a clean Linux checkout, PostgreSQL, and Chromium desktop/mobile journeys.
+The [CI workflow](https://github.com/drowningFi5h/hackThePlot/actions/workflows/ci.yml) checks a clean Linux checkout with PostgreSQL and Chromium. Backend tests live alongside their apps; browser tests cover desktop and mobile. Failed runs include the server logs with the browser reports.
 
 Live verification on Vercel Hobby and Render Free passed: database readiness, guest session creation, HTTPS media and captions, all three challenge solves (0, 2, 7), final completion, a 600-point scoreboard/chart total, logout, and protected-page redirection. A backend redeployment retained the guest session and practice data. Production form markup uses POST and disables submission before hydration.
 

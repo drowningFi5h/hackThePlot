@@ -1,10 +1,14 @@
-name: Verify migration
+name: CI
 on: [push, pull_request]
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16.13-alpine
@@ -23,53 +27,94 @@ jobs:
       FRONTEND_URL: http://localhost:3000
       CSRF_TRUSTED_ORIGINS: http://localhost:3000
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python and uv
+        uses: astral-sh/setup-uv@v6
         with:
           version: "0.10.4"
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: uv sync --locked
+      - name: Install backend dependencies
+        run: uv sync --locked
         working-directory: backend
-      - run: |
+      - name: Check Python lint and formatting
+        run: |
           uv run ruff check .
           uv run ruff format --check .
-          uv run manage.py makemigrations --check --dry-run
-          uv run manage.py test --settings=config.test_settings
-          uv run manage.py migrate --noinput
-          uv run manage.py spectacular --file ../docs/openapi.yaml --validate --fail-on-warn
         working-directory: backend
-      - run: npm ci
+      - name: Check for missing migrations
+        run: uv run manage.py makemigrations --check --dry-run
+        working-directory: backend
+      - name: Run backend tests against PostgreSQL
+        run: uv run manage.py test --settings=config.test_settings
+        working-directory: backend
+      - name: Apply migrations to browser test database
+        run: uv run manage.py migrate --noinput
+        working-directory: backend
+      - name: Generate and validate OpenAPI schema
+        run: uv run manage.py spectacular --file ../docs/openapi.yaml --validate --fail-on-warn
+        working-directory: backend
+      - name: Install frontend dependencies
+        run: npm ci
         working-directory: frontend
-      - run: |
-          npm run api:types
-          npm run lint
-          npm run typecheck
-          npm run build
+      - name: Generate API types
+        run: npm run api:types
         working-directory: frontend
-      - run: git diff --exit-code docs/openapi.yaml frontend/src/types/api.d.ts
-      - run: |
-          cd backend
+      - name: Check generated API files are committed
+        run: git diff --exit-code docs/openapi.yaml frontend/src/types/api.d.ts
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: frontend
+      - name: Check TypeScript
+        run: npm run typecheck
+        working-directory: frontend
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+      - name: Seed browser test data
+        run: |
           uv run manage.py seed_demo
           uv run manage.py seed_browser_fixtures
+        working-directory: backend
+      - name: Start Django and Next.js
+        run: |
+          cd backend
           .venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --threads 2 > /tmp/htp-backend.log 2>&1 &
           cd ../frontend
           npm start > /tmp/htp-frontend.log 2>&1 &
-      - run: |
-          for i in $(seq 1 60); do
-            if curl -fsS http://localhost:3000/ >/dev/null; then exit 0; fi
+      - name: Wait for both servers
+        run: |
+          deadline=$((SECONDS + 120))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            if curl --max-time 3 -fsS http://127.0.0.1:8000/health/ready/ >/dev/null &&
+               curl --max-time 3 -fsS http://localhost:3000/ >/dev/null; then
+              exit 0
+            fi
             sleep 2
           done
+          echo "Django or Next.js did not become ready within 120 seconds." >&2
           exit 1
-      - run: npx playwright install --with-deps chromium
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
         working-directory: frontend
-      - run: npm run test:e2e
+      - name: Run desktop and mobile browser tests
+        run: npm run test:e2e
         working-directory: frontend
-      - uses: actions/upload-artifact@v4
+      - name: Collect server logs on failure
+        if: failure()
+        run: |
+          mkdir -p ci-logs
+          for log in /tmp/htp-backend.log /tmp/htp-frontend.log; do
+            if [ -f "$log" ]; then cp "$log" ci-logs/; fi
+          done
+      - name: Upload browser reports and failure logs
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: browser-results
@@ -77,3 +122,4 @@ jobs:
             frontend/playwright-report/
             frontend/test-results/
             docs/screenshots/
+            ci-logs/
